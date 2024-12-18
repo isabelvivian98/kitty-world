@@ -1,0 +1,35 @@
+---
+- name: Configurar servidores para Tienda de Gatitos
+  hosts: webservers  # Este es el grupo de servidores en tu inventario de Ansible
+  become: yes  # Indica que se debe ejecutar como superusuario (sudo)
+  tasks:
+    - name: Instalar Apache
+      apt:
+        name: apache2
+        state: present  # Asegura que Apache esté instalado
+
+    - name: Copiar archivos del sitio web
+      copy:
+        src: /path/to/your/website/files/
+        dest: /var/www/html/
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Asegurar que el servicio Apache esté corriendo
+      service:
+        name: apache2
+        state: started  # Asegura que Apache esté en ejecución
+        enabled: yes    # Asegura que Apache inicie al arrancar el sistema
+
+    - name: Instalar dependencias de Node.js (si se necesita)
+      apt:
+        name: nodejs
+        state: present
+      when: ansible_facts.packages.nodejs is not defined
+
+    - name: Instalar dependencias de npm
+      npm:
+        path: /var/www/html  # La ruta de tu proyecto
+        state: present
+
